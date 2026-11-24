@@ -1,0 +1,62 @@
+# readme-bento config. Docs: https://github.com/amehara/readme-bento#configuration
+github:
+  user: your-github-username   # leave empty in the Action to use the repo owner
+
+output: bento.svg
+theme: dark                    # dark | light | auto (auto writes both and a <picture> snippet)
+alt: bento grid about me
+
+cards:
+  - type: hero
+    size: 2x2
+    title: your name
+    subtitle: ui/ux designer · design engineer
+    intro: [i design interfaces, and ship them.]
+    headline: [design, to code]
+    accent: pink
+
+  - type: number
+    value: "2+"
+    label: [years designing, and building]
+    color: sunset
+
+  - type: number
+    style: outline
+    size: 1x2
+    eyebrow: github
+    source: contributions
+    label: contributions
+    caption: in the last year
+    color: aurora
+
+  - type: streak
+
+  - type: commit            # your latest public commit, live
+
+  - type: status
+    word: "on"
+    caption: available for projects
+    color: meadow
+
+  - type: stack
+    items: [typescript, java, python, figma, react, next.js]
+
+  - type: number
+    style: plain
+    source: lines
+    label: lines of code written
+    minis: [repos, stars, followers]
+
+  - type: cta
+    text: let's talk
+    caption: something beautiful in mind?
+    color: lime
+
+  - type: number
+    value: ":3"
+    label: made with love
+    color: grape
+
+  - type: band
+    text: made by hand.
+    color: candy

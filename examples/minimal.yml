@@ -1,0 +1,27 @@
+# Smallest useful bento: 5 cards that fill a clean 4x2.5 grid. Grow it from here.
+github:
+  user: your-github-username
+
+output: bento.svg
+theme: dark
+
+cards:
+  - type: hero
+    size: 2x2
+    title: your name
+    subtitle: what you do
+    intro: [a short line about you.]
+    headline: [hello, world.]
+
+  - type: number
+    source: contributions
+    label: [contributions, in the last year]
+    color: aurora
+
+  - type: streak
+
+  - type: commit
+
+  - type: band
+    text: thanks for stopping by.
+    color: candy

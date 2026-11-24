@@ -1,0 +1,56 @@
+# A developer-flavoured bento that follows the reader's light/dark mode.
+github:
+  user: your-github-username
+
+output: bento.svg
+theme: auto
+alt: bento grid about me
+
+cards:
+  - type: hero
+    size: 2x2
+    title: your name
+    subtitle: full-stack developer
+    intro: [i build things for the web, and open source them.]
+    headline: [ship, daily.]
+    accent: blue
+
+  - type: number
+    source: contributions
+    label: [contributions, this year]
+    color: ocean
+
+  - type: streak
+    accent: green
+
+  - type: languages
+    size: 1x2
+
+  - type: commit
+    size: 2x1
+
+  - type: stack
+    size: 1x1
+    label: tools
+    items: [typescript, react, node.js, postgres, docker, git]
+
+  - type: number
+    style: plain
+    source: stars
+    label: stars earned
+    accent: pink
+    minis: [repos, followers, contributions]
+
+  - type: status
+    word: "open"
+    caption: to collaborate
+    color: sunset
+
+  - type: cta
+    text: say hi
+    caption: i reply to everything
+    color: sky
+
+  - type: band
+    text: keep shipping.
+    color: candy

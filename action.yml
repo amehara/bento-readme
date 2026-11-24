@@ -1,0 +1,67 @@
+name: readme-bento
+description: Generate and keep up to date a bento-grid SVG for your GitHub profile README.
+author: amehara
+branding:
+  icon: grid
+  color: purple
+
+inputs:
+  config:
+    description: Path to your bento config file.
+    default: bento.yml
+  token:
+    description: >
+      Optional personal access token (scopes: repo, read:user). Without it only public
+      data is counted; with it private repos and private contributions are included too.
+    required: false
+    default: ""
+  commit:
+    description: Commit and push the generated files ("true" or "false").
+    default: "true"
+  commit-message:
+    description: Commit message used when the files changed.
+    default: "chore: update bento"
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install dependencies
+      shell: bash
+      run: python -m pip install --disable-pip-version-check --quiet "pyyaml>=6,<7"
+
+    - name: Build bento
+      shell: bash
+      env:
+        PYTHONPATH: ${{ github.action_path }}
+        GH_USER: ${{ github.repository_owner }}
+        GITHUB_TOKEN: ${{ github.token }}
+        STATS_TOKEN: ${{ inputs.token }}
+        BENTO_CONFIG: ${{ inputs.config }}
+      run: python -m bento build --config "$BENTO_CONFIG"
+
+    - name: Commit changes
+      if: inputs.commit == 'true'
+      shell: bash
+      env:
+        PYTHONPATH: ${{ github.action_path }}
+        BENTO_CONFIG: ${{ inputs.config }}
+        BENTO_MESSAGE: ${{ inputs.commit-message }}
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        base="$(dirname "$BENTO_CONFIG")"
+        python -m bento outputs --config "$BENTO_CONFIG" | while IFS= read -r f; do
+          git add -- "$base/$f"
+        done
+        git add -- "$base/.bento/stats.json"
+        if git diff --cached --quiet; then
+          echo "bento is already up to date"
+        else
+          git commit -m "$BENTO_MESSAGE"
+          git pull --rebase --autostash
+          git push
+        fi
