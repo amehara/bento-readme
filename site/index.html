@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>readme-bento · build your GitHub bento</title>
+  <meta name="description" content="Design a bento-grid for your GitHub profile README with a live preview. No code needed.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><span class="logo" aria-hidden="true"></span> readme-bento</div>
+    <div class="top-actions">
+      <button id="lang" class="ghost" type="button" aria-label="Language"></button>
+      <a class="ghost" href="https://github.com/amehara/readme-bento" rel="noopener" data-i18n="repo">GitHub</a>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="controls" aria-labelledby="h-start">
+      <div class="intro">
+        <h1 data-i18n="title">Build your GitHub bento</h1>
+        <p data-i18n="subtitle">Pick a style, make it yours and watch it change live. Nothing to install, no code.</p>
+      </div>
+
+      <div class="block">
+        <h2 id="h-start"><span class="num">1</span> <span data-i18n="h_start">Start from</span></h2>
+        <div id="presets" class="chips" role="group"></div>
+      </div>
+
+      <div class="block">
+        <h2><span class="num">2</span> <span data-i18n="h_you">About you</span></h2>
+        <label class="field">
+          <span data-i18n="f_user">Your GitHub username</span>
+          <input id="user" type="text" autocomplete="off" spellcheck="false" placeholder="octocat" maxlength="39">
+        </label>
+        <p id="user-hint" class="hint" data-i18n="user_hint">We use it to fill in your name and bio. Your real numbers appear once it is installed.</p>
+      </div>
+
+      <div class="block">
+        <h2><span class="num">3</span> <span data-i18n="h_look">Look</span></h2>
+        <div class="grid2">
+          <label class="field"><span data-i18n="f_theme">Theme</span><select id="theme"></select></label>
+          <label class="field"><span data-i18n="f_font">Font</span><select id="font"></select></label>
+          <label class="field"><span data-i18n="f_corners">Corners</span><select id="corners"></select></label>
+          <label class="field"><span data-i18n="f_case">Text case</span><select id="text_case"></select></label>
+          <label class="field"><span data-i18n="f_pattern">Texture</span><select id="pattern"></select></label>
+          <div class="field toggles">
+            <label class="check"><input id="shadow" type="checkbox"> <span data-i18n="f_shadow">Shadows</span></label>
+            <label class="check"><input id="grain" type="checkbox"> <span data-i18n="f_grain">Film grain</span></label>
+          </div>
+          <label class="field"><span><span data-i18n="f_gap">Spacing</span> <output id="gap-out"></output></span><input id="gap" type="range" min="0" max="40" step="2"></label>
+          <label class="field"><span><span data-i18n="f_padding">Margin</span> <output id="padding-out"></output></span><input id="padding" type="range" min="0" max="64" step="2"></label>
+        </div>
+      </div>
+
+      <div class="block">
+        <h2><span class="num">4</span> <span data-i18n="h_cards">Cards</span></h2>
+        <div id="cards" class="cards"></div>
+        <div class="add-row">
+          <select id="add-type" aria-label="Card type"></select>
+          <button id="add" type="button" class="primary" data-i18n="add">Add card</button>
+        </div>
+      </div>
+
+      <details class="block advanced">
+        <summary data-i18n="h_yaml">Advanced: edit the config file</summary>
+        <p class="hint" data-i18n="yaml_hint">This is the file the buttons write. You can paste an existing bento.yml here to keep editing it.</p>
+        <textarea id="yaml" spellcheck="false" rows="14"></textarea>
+        <p id="yaml-status" class="hint" role="status"></p>
+      </details>
+    </section>
+
+    <section class="preview" aria-labelledby="h-preview">
+      <div class="sticky">
+        <div class="preview-head">
+          <h2 id="h-preview" data-i18n="h_preview">Live preview</h2>
+          <div id="variants" class="seg" role="group" hidden></div>
+        </div>
+        <p id="status" class="status" role="status"></p>
+        <div id="error" class="error" role="alert" hidden></div>
+        <div class="frame"><img id="preview" alt="Preview of your bento"></div>
+        <p class="hint" data-i18n="preview_hint">The numbers are samples. Yours are filled in automatically every day.</p>
+      </div>
+    </section>
+  </main>
+
+  <section class="install" id="install" aria-labelledby="h-install">
+    <h2 id="h-install"><span class="num">5</span> <span data-i18n="h_install">Put it on your profile</span></h2>
+    <div id="install-body"></div>
+  </section>
+
+  <footer class="foot">
+    <span data-i18n="foot">Free and open source (MIT). It runs entirely in your browser: nothing you type here is sent anywhere, except your username to GitHub to read your public profile.</span>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

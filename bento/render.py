@@ -1,6 +1,7 @@
 """Config + stats -> SVG documents."""
 import copy
 import os
+import re
 
 from . import layout, metrics
 from .cards import CARDS, Ctx
@@ -9,6 +10,35 @@ from .svg import Canvas
 # card keys that hold text the viewer reads; `style.text_case` is applied to these
 TEXT_KEYS = ("title", "subtitle", "intro", "headline", "label", "caption", "eyebrow", "value", "word", "text",
              "body", "author", "unit", "updated_label", "items", "minis")
+
+
+_PLACEHOLDER = re.compile(r"\{(\w+)(?:\|([^{}]*))?\}")
+
+
+def profile_values(stats, user=""):
+    """Values available as {name}, {first_name}, {login}, {bio}, {location}, {company} and {blog}."""
+    p = dict(stats.get("profile") or {})
+    login = p.get("login") or stats.get("username") or user
+    name = p.get("name") or login
+    vals = {k: str(p.get(k) or "") for k in ("bio", "location", "company", "blog")}
+    vals.update(login=str(login), name=str(name), first_name=str(name).split()[0] if str(name).strip() else str(login))
+    return vals
+
+
+def expand(value, vals):
+    """Fills {placeholders}; {key|fallback} uses the fallback when the value is empty. Unknown keys stay as typed."""
+    if isinstance(value, str):
+        def sub(m):
+            key, fallback = m.group(1), m.group(2)
+            if key not in vals:
+                return m.group(0)
+            return vals[key] or (fallback or "")
+        return _PLACEHOLDER.sub(sub, value)
+    if isinstance(value, list):
+        return [expand(v, vals) for v in value]
+    if isinstance(value, dict):
+        return {k: (expand(v, vals) if k in ("name", "label", "value") else v) for k, v in value.items()}
+    return value
 
 
 def _case(value, mode):
@@ -21,13 +51,14 @@ def _case(value, mode):
     return value
 
 
-def apply_case(spec, mode):
-    if mode == "keep":
-        return spec
+def apply_case(spec, mode, vals=None):
     out = dict(spec)
     for k in TEXT_KEYS:
         if k in out:
-            out[k] = _case(out[k], mode)
+            if vals:
+                out[k] = expand(out[k], vals)
+            if mode != "keep":
+                out[k] = _case(out[k], mode)
     return out
 
 
@@ -51,14 +82,15 @@ def render_svg(cfg, stats, theme):
     width, height = layout.CANVAS_W, layout.canvas_height(geo, total)
     cv.background(width, height, cfg["palettes"])
     data = _stats_case(stats, style["text_case"])
+    vals = profile_values(stats, cfg["user"])
     for i, (card, (col, unit)) in enumerate(zip(cfg["cards"], spots)):
         rect = layout.rect(geo, col, unit, card["cols"], card["units"])
-        spec = apply_case(card["spec"], style["text_case"])
+        spec = apply_case(card["spec"], style["text_case"], vals)
         CARDS[spec["type"]].fn(Ctx(cv, theme, data, cfg["palettes"], i, spec), spec, *rect)
     cv.finish(width, height)
-    hero = next((c["spec"] for c in cfg["cards"] if c["spec"]["type"] == "hero"), {})
+    hero = next((apply_case(c["spec"], "keep", vals) for c in cfg["cards"] if c["spec"]["type"] == "hero"), {})
     title = " · ".join(p for p in (hero.get("title") or cfg["user"], hero.get("subtitle")) if p) or "bento"
-    return cv.document(width, height, title, cfg["alt"])
+    return cv.document(width, height, title, expand(cfg["alt"], vals))
 
 
 def outputs(cfg):
@@ -81,8 +113,8 @@ def build(cfg, stats, base_dir="."):
     return written
 
 
-def readme_snippet(cfg):
-    alt = cfg["alt"].replace('"', "&quot;")
+def readme_snippet(cfg, stats=None):
+    alt = expand(cfg["alt"], profile_values(stats or {}, cfg["user"])).replace('"', "&quot;")
     outs = outputs(cfg)
     if len(outs) == 1:
         return f'<img src="./{outs[0][2]}" alt="{alt}" width="100%">'

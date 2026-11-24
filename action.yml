@@ -7,7 +7,9 @@ branding:
 
 inputs:
   config:
-    description: Path to your bento config file.
+    description: >
+      Path to your bento config file. If the file does not exist, a bento is built automatically
+      from your GitHub profile (zero configuration).
     default: bento.yml
   token:
     description: >

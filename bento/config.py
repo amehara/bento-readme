@@ -73,7 +73,7 @@ def _check_style(raw, palettes):
         if k not in STYLE_KEYS:
             raise ConfigError(f"style: unknown key {k!r}.{_suggest(k, STYLE_KEYS)} Valid keys: {', '.join(sorted(STYLE_KEYS))}")
     st = {"corner_scale": 1.0, "border": True, "border_width": 1.0, "border_opacity": None, "gloss": 1.0,
-          "shadow": 0.0, "grain": 0.0, "background": None, "font": "sora", "text_case": "keep", "pattern": None,
+          "shadow": 0.0, "grain": 0.0, "background": "transparent", "font": "sora", "text_case": "keep", "pattern": None,
           "pattern_opacity": 0.10, "mesh_blur": 1.0, "gap": 16, "padding": 24}
     c = raw.get("corners")
     if c is not None:
@@ -125,6 +125,9 @@ def _check_style(raw, palettes):
         st["gap"] = _num(raw["gap"], 0, 40, "style.gap")
     if "padding" in raw:
         st["padding"] = _num(raw["padding"], 0, 64, "style.padding")
+    else:
+        # a transparent canvas shows only the cards, so no outer margin; shadows and opaque canvases need some room
+        st["padding"] = 0 if st["background"] == "transparent" and not st["shadow"] else 24
     return st
 
 
@@ -295,6 +298,18 @@ def _check_card(i, spec, palettes, gradients, base_dir):
         rows = " or ".join(str(r) for r in style_rows)
         raise ConfigError(f"{where}: size {spec.get('size')!r} is not supported; columns {lo}-{hi}, rows {rows}")
     return spec, cols, units
+
+
+DEFAULT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "default.yml")
+
+
+def load_or_default(path):
+    """Like load(), but a missing file means "use the built-in bento made from your GitHub profile"."""
+    if os.path.exists(path):
+        return load(path)
+    cfg = load(DEFAULT_PATH)
+    cfg["default"] = True
+    return cfg
 
 
 def load(path):

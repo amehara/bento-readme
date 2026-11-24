@@ -48,6 +48,7 @@ class Ctx:
         bg = spec.get("bg", spec.get("color"))
         if bg is None:
             bg = mesh
+        cv.shapes.append((x, y, w, h, r))
         cv.shadow(x, y, w, h, r)
         theme_gloss = t["gloss"] * st["gloss"]
         if bg is None:

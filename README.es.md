@@ -19,17 +19,30 @@ Los bento READMEs quedan genial, pero hacer uno implica editar un SVG a mano, y 
 - **Un solo archivo.** Eliges tarjetas, tamaños y colores en `bento.yml`; el layout se hace solo.
 - **Datos en vivo.** Contribuciones, racha, último commit, lenguajes, estrellas y líneas de código, refrescados a diario por una GitHub Action.
 - **Nada que alojar.** Se ejecuta en *tu* repo y escribe un SVG estático. Sin servidor, sin servicios de terceros, sin límites de uso.
+- **Solo las tarjetas.** La imagen tiene el fondo transparente, así que se integra en cualquier README. Pon un fondo sólido o degradado detrás solo si quieres.
 - **Hazlo tuyo.** 15 temas, 25 paletas, tus propios colores, fuentes, esquinas, sombras, grano y texturas. Cada tarjeta puede cambiar su fondo, color de texto y radio. Mira [Hazlo tuyo](#hazlo-tuyo).
 - **Claro, oscuro o ambos.** Con `theme: auto` (o cualquier par, como `[nord, solarized-light]`) sigue el tema de GitHub de quien te visita.
 - **Seguro.** El SVG lleva su propia fuente, sin scripts ni peticiones externas, y todo el texto va escapado.
 
-## Empezar (3 minutos)
+## Empezar
+
+Elige el camino que más te convenga. Los tres dan el mismo resultado.
+
+### A. Sin código: el configurador web
+
+Abre **[amehara.github.io/readme-bento](https://amehara.github.io/readme-bento/)**, elige un estilo de partida, cambia tema, colores y tarjetas con el formulario y mira la vista previa actualizarse en directo. Al final te da cinco pasos cortos con botones que abren GitHub con cada archivo ya rellenado. Funciona entero en tu navegador.
+
+### B. Un solo archivo, cero configuración
+
+Añade solo el workflow de abajo a tu repositorio de perfil, **sin `bento.yml`**. readme-bento crea entonces un bento a partir de tu perfil de GitHub (nombre, bio, ubicación, contribuciones, lenguajes, repos destacados). Añade un `bento.yml` más adelante cuando quieras personalizarlo. En local: `python -m bento init --zero`.
+
+### C. Control total: escribe `bento.yml`
 
 Necesitas tu repositorio de perfil: un repo público con exactamente tu nombre de usuario (`github.com/<tú>/<tú>`).
 
 **1. Añade tu configuración.** Crea `bento.yml` en ese repo. Parte de uno de los ejemplos ([designer](examples/designer.yml), [developer](examples/developer.yml), [minimal](examples/minimal.yml)) y cambia `github.user` y los textos.
 
-**2. Añade el workflow.** Crea `.github/workflows/bento.yml`:
+**2. Añade el workflow** (es el único archivo que necesita el camino B). Crea `.github/workflows/bento.yml`:
 
 ```yaml
 name: update bento
@@ -93,6 +106,8 @@ cards:
     items: [typescript, react, docker]
 ```
 
+Los textos pueden usar tu perfil de GitHub: `title: "{name}"`, `body: "{bio|texto si está vacío}"`, además de `{login}`, `{first_name}`, `{location}`, `{company}` y `{blog}`. Ponlos entre comillas para que YAML conserve las llaves.
+
 Las tarjetas se colocan en una rejilla de 4 columnas en el orden en que las listas, y las pequeñas rellenan los huecos. Consulta la [referencia completa](docs/configuration.md) para ver todas las tarjetas, tamaños, colores y opciones.
 
 ## Tarjetas disponibles
@@ -145,7 +160,7 @@ Al SVG solo llegan los *números*; los nombres de repositorios privados nunca se
 
 ## Previsualizar en local
 
-Puedes diseñar tu bento sin subir nada. Necesitas Python 3.9+ y `pip install pyyaml`:
+Puedes diseñar tu bento sin subir nada. Necesitas Python 3.10+ y `pip install pyyaml`:
 
 ```bash
 git clone https://github.com/amehara/readme-bento && cd readme-bento

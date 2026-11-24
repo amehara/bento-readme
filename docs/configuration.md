@@ -15,6 +15,7 @@ gradients: {}              # your own text gradients
 cards: []                  # the grid, in order
 ```
 
+- [Your GitHub profile in the texts](#your-github-profile-in-the-texts)
 - [The grid](#the-grid)
 - [Themes](#themes)
 - [Style](#style)
@@ -24,6 +25,29 @@ cards: []                  # the grid, in order
 - [Fonts and languages](#fonts-and-languages)
 - [Data sources](#data-sources)
 
+## Your GitHub profile in the texts
+
+Any text can pull from your GitHub profile. Quote the value so YAML keeps the braces.
+
+| Placeholder | Value |
+| --- | --- |
+| `{name}` | Your display name (or your username if you have none) |
+| `{first_name}` | The first word of your name |
+| `{login}` | Your username |
+| `{bio}`, `{location}`, `{company}`, `{blog}` | The matching profile fields |
+| `{bio\|fallback}` | The value, or `fallback` when it is empty |
+
+```yaml
+- type: hero
+  title: "{name}"
+  subtitle: "@{login}"
+  headline: ["hi, i'm", "{first_name}"]
+- type: text
+  body: "{bio|i build things and share them here.}"
+```
+
+Unknown placeholders are left exactly as typed. With **no `bento.yml` at all**, readme-bento uses a built-in config made of these placeholders ([`bento/data/default.yml`](../bento/data/default.yml)); copy it to `bento.yml` to start customizing.
+
 ## The grid
 
 The canvas is 1200 px wide with **4 columns**. A card's `size` is `COLSxROWS`:
@@ -32,6 +56,7 @@ The canvas is 1200 px wide with **4 columns**. A card's `size` is `COLSxROWS`:
 - Rows can be half-height: `4x0.5` is a slim band.
 - Cards are placed in the order you list them, each in the first free spot, so small cards fill any gaps. If the grid looks uneven, reorder the cards or add a small one to fill the hole.
 - A row is always 232 px tall. `style.gap` and `style.padding` change the spacing around it.
+- By default the image has a **transparent background and no outer margin**, so only the cards show and they line up with your README text. Use `style.background` to put something behind them.
 
 ## Themes
 
@@ -71,7 +96,7 @@ theme: [brand, paper]
 | Key | Type | Meaning |
 | --- | --- | --- |
 | `base` | theme name | Start from this theme (default `dark`). |
-| `canvas` | hex | Background behind all cards. |
+| `canvas` | hex | Background behind all cards, used when `style.background: theme`. |
 | `card`, `card_strong` | hex | Card fill. `card_strong` is used by hero / commit / plain number cards. |
 | `text`, `text_soft`, `muted` | hex | Main, secondary and label text. |
 | `stroke` | hex | Border color. |
@@ -89,7 +114,7 @@ Global look, applied to every card. All keys are optional.
 style:
   corners: soft          # round | soft | sharp | a number of pixels (0-60, 36 is the default)
   gap: 16                # space between cards, 0-40
-  padding: 24            # space around the grid, 0-64
+  padding: 0             # space around the grid, 0-64 (0 with a transparent background, 24 otherwise)
   shadow: true           # drop shadow under cards (true, false or 0-1)
   border: true           # true | false | a hex color
   border_width: 1        # 0-8
@@ -98,7 +123,7 @@ style:
   grain: 0.1             # film grain over everything (true, false or 0-0.5)
   pattern: dots          # none | dots | grid | lines | grain on every card
   pattern_opacity: 0.1
-  background: theme      # theme | transparent | hex | palette name | [hex, hex]
+  background: transparent  # transparent (default) | theme | hex | palette name | [hex, hex]
   mesh_blur: 1           # softness of mesh gradients, 0.3-2
   font: sora             # sora | system | serif | mono
   text_case: keep        # keep | lower | upper
@@ -112,7 +137,8 @@ Some ideas:
 | Brutalist | `theme: brutalist`, `corners: 0`, `border_width: 3`, `gloss: false` |
 | Retro terminal | `theme: terminal`, `font: mono`, `corners: 0`, `pattern: lines` |
 | Film poster | `grain: 0.12`, `background: [ "#12002b", "#000000" ]` |
-| Floating cards | `background: transparent`, `shadow: true` |
+| Solid canvas behind the cards | `background: theme` (uses the theme's `canvas` color) |
+| Floating cards with shadows | `shadow: true` (adds a margin so the shadow is not cut) |
 | Lowercase aesthetic | `text_case: lower` |
 
 ## Options every card accepts

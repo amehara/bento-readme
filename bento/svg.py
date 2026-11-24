@@ -36,6 +36,7 @@ class Canvas:
         self.style = style
         self.gradients = gradients  # name -> [(offset, color)]
         self.defs, self.body = [], []
+        self.shapes = []  # (x, y, w, h, r) of every card, so effects can be limited to the cards
         self._n = 0
         self._cache = {}
         self.uses_outline_font = False
@@ -219,9 +220,14 @@ class Canvas:
         if g:
             f = self.grain_filter()
             c = self.uid("c")
-            self.defs.append(
-                f'<clipPath id="{c}"><rect width="{width}" height="{height}" rx="{self.canvas_radius()}"/></clipPath>'
-            )
+            if self.style["background"] == "transparent":
+                # no canvas to grain: only the cards get it
+                shape = "".join(
+                    f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{r}"/>' for x, y, w, h, r in self.shapes
+                )
+            else:
+                shape = f'<rect width="{width}" height="{height}" rx="{self.canvas_radius()}"/>'
+            self.defs.append(f'<clipPath id="{c}">{shape}</clipPath>')
             self.add(
                 f'<g clip-path="url(#{c})" style="pointer-events:none"><rect width="{width}" height="{height}" '
                 f'fill="#808080" filter="url(#{f})" opacity="{g:.2f}"/></g>'

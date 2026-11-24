@@ -4,3 +4,4 @@ __pycache__/
 .bento/
 examples/out-*/
 .claude/
+_site/

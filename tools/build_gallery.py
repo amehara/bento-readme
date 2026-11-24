@@ -39,11 +39,11 @@ def main():
     with tempfile.TemporaryDirectory() as tmp:
         for name in themes.THEMES:
             cards = THEME_CARDS.replace("THEME", name)
-            build(f"theme: {name}\nstyle: {{padding: 16, gap: 12}}\n{cards}", f"theme-{name}.svg", tmp)
+            build(f"theme: {name}\nstyle: {{padding: 16, gap: 12, background: theme}}\n{cards}", f"theme-{name}.svg", tmp)
             print("wrote theme", name)
         # one image with every palette
         items = "\n".join(f"  - {{type: number, value: \"{n}\", color: {n}, label: [palette]}}" for n in palettes.PALETTES)
-        build("theme: dark\nstyle: {text_case: lower}\ncards:\n" + items + "\n", "palettes.svg", tmp)
+        build("theme: dark\nstyle: {text_case: lower, background: theme, padding: 24}\ncards:\n" + items + "\n", "palettes.svg", tmp)
         print("wrote palettes")
 
 

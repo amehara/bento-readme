@@ -1,0 +1,45 @@
+# Built-in bento used when a repository has no bento.yml: everything comes from your GitHub profile.
+# Copy this file to bento.yml to start customizing it. {name}, {bio}... are filled from your profile.
+github: {}               # empty: uses the repository owner
+
+output: bento.svg
+theme: auto              # follows each visitor's light/dark mode
+alt: "bento grid about {name}"
+
+cards:
+  - type: hero
+    size: 2x2
+    title: "{name}"
+    subtitle: "@{login}"
+    intro: ["{location|}"]
+    headline: ["hi, i'm", "{first_name}"]
+
+  - type: number
+    source: contributions
+    label: [contributions, in the last year]
+    color: ocean
+
+  - type: streak
+
+  - type: heatmap
+
+  - type: commit
+
+  - type: languages
+
+  - type: number
+    style: plain
+    source: stars
+    label: stars earned
+    minis: [repos, followers]
+
+  - type: text
+    size: 2x1
+    title: about
+    body: "{bio|i build things and share them here.}"
+
+  - type: repos
+    size: 2x1
+
+  - type: band
+    text: "{first_name|hello}."

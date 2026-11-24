@@ -10,7 +10,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 from bento import cli, colors, layout, metrics, render, stats, themes  # noqa: E402
-from bento.config import ConfigError, load  # noqa: E402
+from bento.config import ConfigError, load, load_or_default  # noqa: E402
+
+sys.path.insert(0, os.path.join(ROOT, "site"))
+import webapi  # noqa: E402  (the bridge the web configurator calls from the browser)
 
 EXAMPLES = os.path.join(ROOT, "examples")
 EXAMPLE_NAMES = sorted(f[:-4] for f in os.listdir(EXAMPLES) if f.endswith(".yml"))
@@ -265,13 +268,33 @@ class RenderTests(unittest.TestCase):
         cards = "cards:\n  - {type: streak, label: Streak}\n  - {type: number, value: hi, color: ocean}\n"
         base = svg_of(load(write_cfg(cards)))
         for style in ("shadow: true", "grain: true", "corners: sharp", "pattern: dots", "border: false",
-                      "background: transparent", "background: ['#000000', '#222222']", "background: ocean",
-                      "gap: 4, padding: 0", "mesh_blur: 1.5", "gloss: false", "border: '#ff0000'",
-                      "border_width: 4", "text_case: upper"):
+                      "background: theme", "background: ['#000000', '#222222']", "background: ocean",
+                      "background: '#123456'", "gap: 4, padding: 40", "mesh_blur: 1.5", "gloss: false",
+                      "border: '#ff0000'", "border_width: 4", "text_case: upper", "font: mono"):
             with self.subTest(style=style):
-                svg = svg_of(load(write_cfg("style: {" + style + "}\n" + card("streak"))))
+                svg = svg_of(load(write_cfg("style: {" + style + "}\n" + cards)))
                 ET.fromstring(svg)
                 self.assertNotEqual(svg, base)
+
+    def test_background_is_transparent_by_default(self):
+        cards = "cards:\n  - {type: streak}\n  - {type: number, value: hi}\n"
+        cfg = load(write_cfg(cards))
+        self.assertEqual(cfg["style"]["background"], "transparent")
+        self.assertEqual(cfg["style"]["padding"], 0)  # only the cards are visible, edge to edge
+        svg = svg_of(cfg)
+        self.assertNotIn('<rect width="1200"', svg)  # no full-canvas rectangle
+        self.assertIn('<rect x="0.0"', svg.replace('x="0"', 'x="0.0"'))
+        solid = svg_of(load(write_cfg("style: {background: theme}\n" + cards)))
+        self.assertIn('<rect width="1200"', solid)
+        self.assertEqual(load(write_cfg("style: {background: theme}\n" + cards))["style"]["padding"], 24)
+        self.assertEqual(load(write_cfg("style: {shadow: true}\n" + cards))["style"]["padding"], 24)  # room for the shadow
+        self.assertEqual(load(write_cfg("style: {padding: 10}\n" + cards))["style"]["padding"], 10)
+
+    def test_grain_on_a_transparent_canvas_only_covers_the_cards(self):
+        cards = "cards:\n  - {type: streak}\n  - {type: number, value: hi}\n"
+        svg = svg_of(load(write_cfg("style: {grain: true}\n" + cards)))
+        clip = svg.split("<clipPath id=")[-1].split("</clipPath>")[0]
+        self.assertEqual(clip.count("<rect"), 2)  # one per card, not the whole canvas
 
     def test_card_overrides(self):
         cfg = load(write_cfg(
@@ -308,6 +331,72 @@ class RenderTests(unittest.TestCase):
     def test_heatmap_and_empty_data(self):
         cfg = load(write_cfg("cards:\n  - {type: heatmap}\n  - type: repos\n  - type: languages\n  - type: streak\n"))
         ET.fromstring(svg_of(cfg, stats.empty("me")))
+
+
+class ZeroConfigTests(unittest.TestCase):
+    def test_missing_config_falls_back_to_the_builtin_bento(self):
+        cfg = load_or_default(os.path.join(tempfile.mkdtemp(), "bento.yml"))
+        self.assertTrue(cfg["default"])
+        svg = svg_of(cfg)
+        ET.fromstring(svg)
+        self.assertIn("Octo Cat", svg)  # filled from the (demo) profile
+
+    def test_existing_config_wins(self):
+        cfg = load_or_default(write_cfg("cards:\n  - type: streak\n"))
+        self.assertNotIn("default", cfg)
+
+    def test_placeholders_and_fallbacks(self):
+        data = stats.demo("octocat")
+        data["profile"] = {"name": "Ada Lovelace", "login": "ada", "bio": "", "location": "", "company": "", "blog": ""}
+        cfg = load(write_cfg(
+            "cards:\n  - {type: text, title: '{first_name} / {login}', body: '{bio|no bio yet} {nope} {location}'}\n"
+        ))
+        svg = svg_of(cfg, data)
+        self.assertIn("Ada / ada", svg)
+        self.assertIn("no bio yet {nope}", svg)  # fallback used, unknown keys left as typed
+
+    def test_untrusted_profile_values_are_escaped(self):
+        data = stats.demo("octocat")
+        data["profile"] = {"name": "<script>x</script>", "login": "a", "bio": '"><svg onload=1>', "location": "",
+                           "company": "", "blog": ""}
+        svg = svg_of(load_or_default(os.path.join(tempfile.mkdtemp(), "none.yml")), data)
+        ET.fromstring(svg)
+        self.assertNotIn("<script", svg)
+        self.assertNotIn("<svg onload", svg)
+
+    def test_init_zero_writes_only_the_workflow(self):
+        d = tempfile.mkdtemp()
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(cli.main(["init", "--zero", "--dir", d]), 0)
+        self.assertTrue(os.path.exists(os.path.join(d, ".github", "workflows", "bento.yml")))
+        self.assertFalse(os.path.exists(os.path.join(d, "bento.yml")))
+
+
+class WebApiTests(unittest.TestCase):
+    def test_schema_lists_every_card_with_its_sizes(self):
+        import json
+        sch = json.loads(webapi.schema())
+        self.assertIn("hero", sch["cards"])
+        self.assertEqual(sch["cards"]["hero"]["cols"], [2, 4])
+        self.assertIn("nord", sch["themes"])
+        self.assertIn("ocean", sch["palettes"])
+
+    def test_preview_renders_valid_config_and_reports_errors(self):
+        import json
+        ok = json.loads(webapi.preview("theme: auto\ncards:\n  - type: streak\n", '{"name": "Ada Lovelace"}'))
+        self.assertIsNone(ok["error"])
+        self.assertEqual([f["variant"] for f in ok["files"]], ["dark", "light"])
+        ET.fromstring(ok["files"][0]["svg"])
+        self.assertIn("<picture>", ok["snippet"])
+        bad = json.loads(webapi.preview("cards:\n  - type: numbr\n"))
+        self.assertIn("Did you mean 'number'", bad["error"])
+        broken = json.loads(webapi.preview("cards: [unclosed"))
+        self.assertTrue(broken["error"])
+
+    def test_preview_uses_real_profile_text_but_sample_numbers(self):
+        import json
+        res = json.loads(webapi.preview("cards:\n  - {type: hero, size: 2x2, title: '{name}'}\n", '{"name": "Ada Lovelace"}'))
+        self.assertIn("Ada Lovelace", res["files"][0]["svg"])
 
 
 class SafetyTests(unittest.TestCase):

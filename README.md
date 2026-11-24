@@ -19,17 +19,30 @@ Bento READMEs look great, but making one means hand-editing an SVG, and the numb
 - **One file to edit.** Pick cards, sizes and colors in `bento.yml`; the layout is done for you.
 - **Live data.** Contributions, streak, latest commit, top languages, stars, lines of code. Refreshed daily by a GitHub Action.
 - **Nothing to host.** It runs in *your* repo and writes a static SVG. No server, no third-party service, no rate limits.
+- **Just the cards.** The image has a transparent background, so it blends into any README. Put a solid or gradient background behind it only if you want one.
 - **Make it yours.** 15 themes, 25 palettes, your own colors, fonts, corners, shadows, grain and textures. Every card can override its background, text color and radius. See [Make it yours](#make-it-yours).
 - **Light, dark or both.** `theme: auto` (or any pair, like `[nord, solarized-light]`) follows your visitors' GitHub theme.
 - **Safe by default.** The SVG embeds its own font, has no scripts or external requests, and every text is escaped.
 
-## Quick start (3 minutes)
+## Quick start
+
+Pick the path that fits you. All three produce the same thing.
+
+### A. No code: the web configurator
+
+Open **[amehara.github.io/readme-bento](https://amehara.github.io/readme-bento/)**, choose a starting style, change the theme, colors and cards with the form and watch the preview update live. At the bottom it gives you five short steps with buttons that open GitHub with each file already filled in. It runs entirely in your browser.
+
+### B. One file, zero configuration
+
+Add only the workflow below to your profile repository, **without a `bento.yml`**. readme-bento then builds a bento from your GitHub profile (name, bio, location, contributions, languages, top repositories). Add a `bento.yml` later whenever you want to customize it. Locally: `python -m bento init --zero`.
+
+### C. Full control: write `bento.yml`
 
 You need your profile repository: a public repo named exactly like your username (`github.com/<you>/<you>`).
 
 **1. Add your config.** Create `bento.yml` in that repo. Start from one of the examples ([designer](examples/designer.yml), [developer](examples/developer.yml), [minimal](examples/minimal.yml)) and change `github.user` and the texts.
 
-**2. Add the workflow.** Create `.github/workflows/bento.yml`:
+**2. Add the workflow** (this is the only file path B needs). Create `.github/workflows/bento.yml`:
 
 ```yaml
 name: update bento
@@ -61,7 +74,7 @@ jobs:
 
 That's it. From now on it refreshes itself daily and whenever you edit `bento.yml`.
 
-> **Tip:** with `theme: auto` the build writes `bento-dark.svg` and `bento-light.svg` and prints the `<picture>` snippet to paste (see the workflow log).
+> **Tip:** with `theme: auto` the build writes `bento-dark.svg` and `bento-light.svg` and prints the `<picture>` snippet to paste (see the workflow log). With path B (no `bento.yml`) the build uses `theme: auto`, so use that `<picture>` snippet.
 
 ## A taste of the config
 
@@ -92,6 +105,8 @@ cards:
   - type: stack
     items: [typescript, react, docker]
 ```
+
+Texts can use your GitHub profile: `title: "{name}"`, `body: "{bio|a fallback if empty}"`, plus `{login}`, `{first_name}`, `{location}`, `{company}` and `{blog}`. Quote them so YAML keeps the braces.
 
 Cards are placed on a 4-column grid in the order you list them, and small cards fill any gaps. See the [full reference](docs/configuration.md) for every card, size, color and option.
 
@@ -168,7 +183,7 @@ Only the *numbers* end up in the SVG. Repository names are never written to it.
 
 ## Preview locally
 
-You can design your bento without pushing anything. You need Python 3.9+ and `pip install pyyaml`:
+You can design your bento without pushing anything. You need Python 3.10+ and `pip install pyyaml`:
 
 ```bash
 git clone https://github.com/amehara/readme-bento && cd readme-bento
@@ -191,11 +206,13 @@ Open the generated `.svg` in a browser. `--demo` uses sample numbers; without it
 
 ## Roadmap
 
-- A web configurator with live preview that exports `bento.yml`
+- Configurator: import/export of whole designs, per-card color and style pickers
 - More cards: pinned repos, now-playing, timeline
 - Custom embedded fonts and an emoji-friendly text mode
 
 Ideas and pull requests are welcome. Run `python -m unittest discover -s tests` before opening one.
+
+To work on the web configurator: `python tools/build_site.py && python -m http.server -d _site 8766`, then open `http://localhost:8766`. The page runs the same Python engine through [Pyodide](https://pyodide.org), so there is no second implementation to keep in sync. Publishing is automatic (`.github/workflows/pages.yml`) once Pages is set to the "GitHub Actions" source in the repository settings.
 
 ## License
 

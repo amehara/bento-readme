@@ -27,6 +27,8 @@ def _demo_calendar():
 
 def demo(user="octocat"):
     return {
+        "profile": {"name": "Octo Cat", "login": user or "octocat", "location": "Madrid", "company": "", "blog": "",
+                    "bio": "I build small things for the web and write about them."},
         "username": user or "octocat",
         "updated": date.today().isoformat(),
         "contributions": 312,
@@ -54,7 +56,7 @@ def empty(user):
     return {
         "username": user, "updated": date.today().isoformat(), "contributions": 0, "streak": 0,
         "last20": [], "lines": 0, "repos": 0, "stars": 0, "followers": 0, "following": 0,
-        "now": None, "languages": [], "calendar": [], "top_repos": [],
+        "now": None, "languages": [], "calendar": [], "top_repos": [], "profile": {},
     }
 
 
@@ -146,6 +148,11 @@ def _languages(cl, repos):
     return [[n, round(100 * s / whole, 1)] for n, s in ranked[:10]]
 
 
+def _profile(cl):
+    _, u = cl.call(f"/users/{cl.user}")
+    return {k: (u.get(k) or "") for k in ("name", "login", "bio", "location", "company", "blog")}
+
+
 def _last_push(cl):
     _, events = cl.call(f"/users/{cl.user}/events/public?per_page=50")
     for e in events:
@@ -200,4 +207,7 @@ def fetch(user, token=None, pat=False, base_dir="."):
     n = _safe(lambda: _last_push(cl))
     if n:
         stats["now"] = n
+    prof = _safe(lambda: _profile(cl))
+    if prof:
+        stats["profile"] = prof
     return stats
