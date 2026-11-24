@@ -9,6 +9,17 @@ with open(os.path.join(_DATA, "metrics.json"), encoding="utf-8") as _f:
 _WEIGHTS = sorted(int(w) for w in _M["sora"])
 _FALLBACK_ADV = 0.62  # chars the font does not have are drawn by a system font
 
+# Other fonts are not embedded, so we only approximate their width relative to Sora (which is wide).
+FONT_SCALE = {"sora": 1.0, "system": 0.93, "serif": 0.88, "mono": None}
+# Estimated widths of fonts we do not embed can be off by a few percent: keep a safety margin.
+FONT_MARGIN = {"sora": 1.0, "system": 0.94, "serif": 0.94, "mono": 0.98}
+_font = "sora"
+
+
+def set_font(name):
+    global _font
+    _font = name if name in FONT_SCALE else "sora"
+
 
 def _table(weight, outline=False):
     if outline:
@@ -19,6 +30,9 @@ def _table(weight, outline=False):
 
 def width(text, size, weight=600, ls=0.0, outline=False):
     """Approximate rendered width of `text` in px (ls = letter-spacing in em)."""
+    if _font == "mono":
+        return len(text) * (0.6 * size + ls * size)
+    scale = FONT_SCALE[_font]
     t = _table(weight, outline)
     fallback = _table(weight) if outline else None
     total = 0.0
@@ -26,12 +40,13 @@ def width(text, size, weight=600, ls=0.0, outline=False):
         adv = t.get(ch)
         if adv is None and fallback is not None:
             adv = fallback.get(ch)
-        total += (_FALLBACK_ADV if adv is None else adv) * size + ls * size
+        total += (_FALLBACK_ADV if adv is None else adv) * size * scale + ls * size
     return total
 
 
 def fit(text, max_w, size, weight=600, ls=0.0, min_size=10, outline=False):
     """Largest font size <= `size` for which `text` fits in `max_w`."""
+    max_w *= FONT_MARGIN[_font]
     w = width(text, size, weight, ls, outline)
     if w <= max_w or w == 0:
         return size
@@ -40,6 +55,7 @@ def fit(text, max_w, size, weight=600, ls=0.0, min_size=10, outline=False):
 
 def clip(text, max_w, size, weight=600, ls=0.0):
     """Shorten `text` with an ellipsis until it fits `max_w`."""
+    max_w *= FONT_MARGIN[_font]
     if width(text, size, weight, ls) <= max_w:
         return text
     while text and width(text + "…", size, weight, ls) > max_w:

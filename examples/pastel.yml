@@ -1,0 +1,54 @@
+# Light/dark pair with tighter spacing, filled chips and custom geometry.
+github:
+  user: your-github-username
+
+output: bento.svg
+alt: pastel bento grid
+
+theme: [catppuccin-mocha, catppuccin-latte]   # [dark theme, light theme]
+
+style:
+  gap: 12
+  padding: 20
+  corners: 28
+  shadow: 0.35
+  mesh_blur: 1.2
+
+cards:
+  - type: hero
+    size: 2x2
+    title: your name
+    subtitle: product designer
+    intro: ["small details,", "big feelings."]
+    headline: [make, it soft.]
+    accent: candy
+
+  - type: number
+    value: "7"
+    label: [years of, practice]
+    color: lavender
+
+  - type: ring
+    value: 85
+    label: Figma
+    caption: daily driver
+    accent: candy
+
+  - type: stack
+    chip_style: filled
+    items: [figma, framer, react, blender, tailwind]
+
+  - type: status
+    word: open
+    caption: for freelance
+    color: peach
+
+  - type: commit
+
+  - type: heatmap
+    size: 2x1
+    accent: mint
+
+  - type: band
+    text: be kind.
+    color: cotton

@@ -1,0 +1,56 @@
+# Green-on-black terminal look: monospaced font, square corners, scanline texture.
+github:
+  user: your-github-username
+
+output: bento.svg
+alt: terminal bento grid
+theme: terminal
+
+style:
+  font: mono
+  corners: 0
+  border_opacity: 0.5
+  pattern: lines
+  pattern_opacity: 0.04
+  gloss: false
+  text_case: lower
+
+cards:
+  - type: hero
+    size: 2x2
+    title: your-name
+    subtitle: "$ whoami -> backend engineer"
+    intro: ["systems, databases,", "and a lot of terminals."]
+    headline: [hello, "world."]
+    accent: green
+
+  - type: number
+    style: plain
+    source: contributions
+    label: commits this year
+    accent: green
+
+  - type: streak
+    accent: green
+
+  - type: heatmap
+    accent: green
+
+  - type: repos
+    size: 1x2
+
+  - type: commit
+
+  - type: languages
+
+  - type: stack
+    size: 3x1
+    label: tools
+    chip_style: outline
+    items: [postgres, redis, docker, linux, vim, rust]
+
+  - type: band
+    text: "exit 0"
+    bg: "#0a2a12"
+    fg: "#4af626"
+    show_updated: false

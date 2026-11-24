@@ -17,7 +17,8 @@ OUT = os.path.join(ROOT, "examples", "img")
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    for name in ("designer", "developer", "minimal"):
+    names = sorted(f[:-4] for f in os.listdir(os.path.join(ROOT, "examples")) if f.endswith(".yml"))
+    for name in names:
         cfg = load(os.path.join(ROOT, "examples", f"{name}.yml"))
         cfg["output"] = f"{name}.svg"
         data = stats.demo("octocat")

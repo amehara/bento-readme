@@ -11,6 +11,20 @@ CACHE_PATH = os.path.join(".bento", "stats.json")
 MAX_REPOS_FOR_LINES = 40
 
 
+def _demo_calendar():
+    """Deterministic pseudo-random 53 weeks x 7 days, so example images do not change between builds."""
+    out, seed = [], 7
+    for w in range(53):
+        week = []
+        for d in range(7):
+            seed = (seed * 1103515245 + 12345) & 0x7FFFFFFF
+            roll = (seed >> 16) % 100
+            busy = 1.0 if (w % 9 not in (3, 4) and d not in (0, 6)) else 0.35
+            week.append(0 if roll > 62 * busy else (roll % 5) + 1)
+        out.append(week)
+    return out
+
+
 def demo(user="octocat"):
     return {
         "username": user or "octocat",
@@ -24,6 +38,13 @@ def demo(user="octocat"):
         "followers": 21,
         "following": 12,
         "now": {"repo": "my-project", "message": "add daily stats workflow", "when": "today"},
+        "calendar": _demo_calendar(),
+        "top_repos": [
+            {"name": "bento-readme", "stars": 128, "language": "Python"},
+            {"name": "design-tokens", "stars": 54, "language": "TypeScript"},
+            {"name": "dotfiles", "stars": 31, "language": "Shell"},
+            {"name": "portfolio", "stars": 12, "language": "CSS"},
+        ],
         "languages": [["TypeScript", 46.0], ["Python", 24.0], ["CSS", 14.0], ["HTML", 9.0], ["Java", 5.0], ["Shell", 2.0]],
     }
 
@@ -33,7 +54,7 @@ def empty(user):
     return {
         "username": user, "updated": date.today().isoformat(), "contributions": 0, "streak": 0,
         "last20": [], "lines": 0, "repos": 0, "stars": 0, "followers": 0, "following": 0,
-        "now": None, "languages": [],
+        "now": None, "languages": [], "calendar": [], "top_repos": [],
     }
 
 
@@ -157,7 +178,8 @@ def fetch(user, token=None, pat=False, base_dir="."):
         while i >= 0 and counts[i] > 0:
             streak += 1
             i -= 1
-        stats.update(contributions=cal["totalContributions"], streak=streak, last20=counts[-20:],
+        weeks = [[d["contributionCount"] for d in w["contributionDays"]] for w in cal["weeks"]]
+        stats.update(contributions=cal["totalContributions"], streak=streak, last20=counts[-20:], calendar=weeks,
                      followers=u["followers"]["totalCount"], following=u["following"]["totalCount"])
 
     rs = _safe(lambda: _repos(cl))
@@ -165,6 +187,10 @@ def fetch(user, token=None, pat=False, base_dir="."):
         recent = sorted(rs, key=lambda r: r.get("pushed_at") or "", reverse=True)[:MAX_REPOS_FOR_LINES]
         stats["repos"] = len(rs)
         stats["stars"] = sum(r["stargazers_count"] for r in rs)
+        # public repos only: a private repository's name must never end up in a public SVG
+        public = [r for r in rs if not r.get("private") and not r.get("archived")]
+        top = sorted(public, key=lambda r: (-r["stargazers_count"], r.get("pushed_at") or ""))[:8]
+        stats["top_repos"] = [{"name": r["name"], "stars": r["stargazers_count"], "language": r.get("language")} for r in top]
         total = sum(_safe(lambda r=r: _additions(cl, r["full_name"]), 0) for r in recent)
         stats["lines"] = max(total, prev.get("lines", 0))  # additions only ever grow
         langs = _safe(lambda: _languages(cl, recent))

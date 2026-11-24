@@ -1,11 +1,13 @@
-<!doctype html>
-<meta charset="utf-8">
-<title>readme-bento preview</title>
-<body style="margin:0;background:#777;font:12px sans-serif">
-<!-- dev tool: python -m http.server 8765, then open /tools/preview.html (build with --out-dir examples/out-<name>) -->
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px">
-<img src="../examples/out-designer/bento.svg" style="width:100%">
-<img src="../examples/out-minimal/bento.svg" style="width:100%">
-<img src="../examples/out-developer/bento-dark.svg" style="width:100%">
-<img src="../examples/out-developer/bento-light.svg" style="width:100%">
-</div>
+<!doctype html><meta charset="utf-8"><title>readme-bento preview</title>
+<body style="margin:0;background:#777">
+<!-- dev tool: serve the repo root (python -m http.server 8765) and open /tools/preview.html
+     optional: ?only=neon  shows just the images whose file name contains "neon" -->
+<div id="g" style="display:grid;gap:8px;padding:8px"></div>
+<script>
+const files = ["designer.svg", "developer-dark.svg", "developer-light.svg", "editorial.svg", "minimal.svg", "neon.svg", "pastel-dark.svg", "pastel-light.svg", "terminal.svg"];
+const only = new URLSearchParams(location.search).get("only");
+const shown = files.filter(f => !only || f.includes(only));
+const g = document.getElementById("g");
+g.style.gridTemplateColumns = only ? "1fr" : "1fr 1fr";
+for (const f of shown) { const i = new Image(); i.src = "../examples/img/" + f; i.title = f; i.style.width = "100%"; g.append(i); }
+</script>

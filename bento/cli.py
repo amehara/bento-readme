@@ -7,7 +7,7 @@ from . import __version__, render, stats
 from .config import ConfigError, load
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TEMPLATES = ("designer", "developer", "minimal")
+TEMPLATES = ("designer", "developer", "minimal", "neon", "editorial", "terminal", "pastel")
 PLACEHOLDER_USER = "your-github-username"
 
 WORKFLOW = """name: update bento
@@ -63,14 +63,14 @@ def cmd_build(args):
 
 def cmd_outputs(args):
     cfg = load(args.config)
-    for _, rel in render.outputs(cfg):
+    for _, _, rel in render.outputs(cfg):
         print(rel)
     return 0
 
 
 def cmd_validate(args):
     cfg = load(args.config)
-    print(f"ok: {len(cfg['cards'])} cards, theme {cfg['theme']}, output {cfg['output']}")
+    print(f"ok: {len(cfg['cards'])} cards, {len(cfg['variants'])} theme variant(s), output {cfg['output']}")
     return 0
 
 

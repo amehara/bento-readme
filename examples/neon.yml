@@ -1,0 +1,69 @@
+# Custom theme + palette + gradient, sharp corners, grain and a grid texture.
+github:
+  user: your-github-username
+
+output: bento.svg
+alt: neon bento grid
+
+theme:
+  base: dark
+  canvas: "#05010f"
+  card: "#0e0720"
+  card_strong: "#0a0418"
+  text: "#f5f0ff"
+  muted: "#9a8fc4"
+  stroke: "#b026ff"
+  stroke_opacity: 0.4
+
+style:
+  corners: sharp
+  border_width: 1.5
+  grain: 0.08
+  pattern: grid
+  pattern_opacity: 0.05
+  text_case: lower
+
+palettes:
+  vapor:
+    base: "#12002b"
+    blobs: ["#ff00e5", "#00e5ff", "#7a00ff", "#ff2e63"]
+    ink: "#ffffff"
+
+gradients:
+  laser: ["#00e5ff", "#ff00e5"]
+
+cards:
+  - type: hero
+    size: 2x2
+    title: your name
+    subtitle: creative developer
+    intro: ["pixels, shaders", "and late nights."]
+    headline: [neon, nights.]
+    accent: laser
+
+  - type: number
+    source: contributions
+    label: [contributions, this year]
+    color: vapor
+
+  - type: streak
+    accent: laser
+
+  - type: heatmap
+    accent: laser
+
+  - type: languages
+
+  - type: status
+    word: live
+    caption: coding right now
+    color: vapor
+
+  - type: cta
+    text: collab?
+    caption: my dms are open
+    color: vapor
+
+  - type: band
+    text: stay neon.
+    color: vapor

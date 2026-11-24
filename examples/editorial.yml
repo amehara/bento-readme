@@ -1,0 +1,65 @@
+# A calm, serif, paper-coloured layout with shadows and soft corners.
+github:
+  user: your-github-username
+
+output: bento.svg
+alt: editorial bento grid
+theme: paper
+
+style:
+  font: serif
+  corners: soft
+  shadow: true
+
+cards:
+  - type: hero
+    size: 2x2
+    title: Your Name
+    subtitle: writer & researcher
+    intro: ["Notes on computing,", "language and craft."]
+    headline: ["Words,", "& code."]
+    accent: ["#b4452c", "#e08a3c"]
+
+  - type: image
+    src: assets/avatar.svg
+    caption: hello there
+
+  - type: ring
+    value: 72
+    label: Learning Rust
+    caption: since March
+    accent: ["#b4452c", "#e08a3c"]
+
+  - type: bars
+    size: 1x2
+    label: Skills
+    accent: ["#b4452c", "#e08a3c"]
+    items:
+      - "Writing: 95"
+      - "Python: 80"
+      - "Design: 65"
+      - "Rust: 40"
+
+  - type: contact
+    label: Find me
+    items:
+      - "Mail: me@example.com"
+      - "Web: example.com"
+      - "Based in: Madrid"
+
+  - type: text
+    style: quote
+    body: Programs must be written for people to read, and only incidentally for machines to execute.
+    author: Abelson & Sussman
+
+  - type: number
+    style: plain
+    source: stars
+    label: Stars earned
+    accent: ["#b4452c", "#e08a3c"]
+    minis: [repos, followers]
+
+  - type: band
+    text: Thank you.
+    bg: ["#f3d9c4", "#f7e8cf"]
+    fg: "#2b2418"

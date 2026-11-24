@@ -6,6 +6,9 @@ output: bento.svg
 theme: dark                    # dark | light | auto (auto writes both and a <picture> snippet)
 alt: bento grid about me
 
+style:
+  text_case: lower          # lowercase everything, like the original look
+
 cards:
   - type: hero
     size: 2x2

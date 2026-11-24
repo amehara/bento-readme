@@ -13,6 +13,21 @@ PALETTES = {
     "ember": {"base": "#c1121f", "blobs": ["#ff9500", "#ff2d55", "#ffd60a", "#ff3b30"], "ink": "#ffffff"},
     "sky": {"base": "#bfe3ff", "blobs": ["#ffffff", "#c8b6ff", "#9be7ff", "#a0c4ff"], "ink": "#0b0b0c"},
     "mono": {"base": "#1c1c1e", "blobs": ["#3a3a3c", "#636366", "#2c2c2e", "#48484a"], "ink": "#ffffff"},
+    "lavender": {"base": "#b9a7ff", "blobs": ["#e0d4ff", "#8fb0ff", "#ffc8f0", "#c7b8ff"], "ink": "#0b0b0c"},
+    "peach": {"base": "#ffb4a2", "blobs": ["#ffd6a5", "#ff8fa3", "#ffe5d9", "#ffcdb2"], "ink": "#0b0b0c"},
+    "forest": {"base": "#0b3d2e", "blobs": ["#1b9e77", "#a3e635", "#0e7c66", "#2d6a4f"], "ink": "#ffffff"},
+    "mint": {"base": "#b7f5d8", "blobs": ["#e6fff3", "#7ee8c8", "#c9f7a5", "#8de5ff"], "ink": "#0b0b0c"},
+    "rose": {"base": "#ff6b9d", "blobs": ["#ffb3c7", "#ff3d7f", "#ffd1dc", "#c86dd7"], "ink": "#0b0b0c"},
+    "gold": {"base": "#f5b700", "blobs": ["#ffe066", "#ff9f1c", "#fff3b0", "#e09f00"], "ink": "#0b0b0c"},
+    "ice": {"base": "#d7f0ff", "blobs": ["#ffffff", "#a5d8ff", "#e0e7ff", "#b8f2e6"], "ink": "#0b0b0c"},
+    "cherry": {"base": "#8b0a30", "blobs": ["#e63962", "#ff6b6b", "#5c0a26", "#c9184a"], "ink": "#ffffff"},
+    "slate": {"base": "#334155", "blobs": ["#64748b", "#475569", "#94a3b8", "#1e293b"], "ink": "#ffffff"},
+    "coral": {"base": "#ff6f61", "blobs": ["#ffb88c", "#ff3d68", "#ffd6c9", "#ff8a5c"], "ink": "#0b0b0c"},
+    "neon": {"base": "#0a0a0a", "blobs": ["#00ffa3", "#ff00e5", "#00d1ff", "#ffee00"], "ink": "#ffffff"},
+    "cotton": {"base": "#ffe4f2", "blobs": ["#cfe8ff", "#fff5ba", "#d4ffe6", "#ffd1ec"], "ink": "#0b0b0c"},
+    "mocha": {"base": "#3b2a24", "blobs": ["#a47551", "#d9a066", "#6f4e37", "#c68b59"], "ink": "#ffffff"},
+    "lagoon": {"base": "#006d77", "blobs": ["#83c5be", "#00b4d8", "#e29578", "#48cae4"], "ink": "#ffffff"},
+    "frost": {"base": "#e5e5ea", "blobs": ["#ffffff", "#d1d1d6", "#f2f2f7", "#c7c7cc"], "ink": "#0b0b0c"},
 }
 
 # Text gradients usable as `accent:`.
@@ -22,39 +37,13 @@ GRADIENTS = {
     "green": [(0, "#30d158"), (0.55, "#a8ff78"), (1, "#ffd60a")],
     "violet": [(0, "#bf5af2"), (0.55, "#5e5ce6"), (1, "#64d2ff")],
     "seg": [(0, "#64d2ff"), (1, "#bf5af2")],
-}
-
-THEMES = {
-    "dark": {
-        "canvas": "#000000",
-        "card": "#161618",
-        "card_strong": "#111113",
-        "text": "#ffffff",
-        "text_soft": "#e5e5ea",
-        "muted": "#a1a1a6",
-        "stroke": "#ffffff",
-        "stroke_opacity": 0.12,
-        "gloss": 0.10,
-        "off": "#3a3a3c",
-        "chip": "#ffffff",
-        "chip_opacity": 0.12,
-        "divider_opacity": 0.14,
-    },
-    "light": {
-        "canvas": "#f2f2f7",
-        "card": "#ffffff",
-        "card_strong": "#ffffff",
-        "text": "#0b0b0c",
-        "text_soft": "#3a3a3c",
-        "muted": "#6e6e73",
-        "stroke": "#000000",
-        "stroke_opacity": 0.08,
-        "gloss": 0.0,
-        "off": "#d1d1d6",
-        "chip": "#000000",
-        "chip_opacity": 0.06,
-        "divider_opacity": 0.10,
-    },
+    "sunset": [(0, "#ff512f"), (1, "#dd2476")],
+    "ocean": [(0, "#00c6ff"), (1, "#0072ff")],
+    "fire": [(0, "#f12711"), (1, "#f5af19")],
+    "mint": [(0, "#11998e"), (1, "#38ef7d")],
+    "candy": [(0, "#ff9a9e"), (1, "#a18cd1")],
+    "gold": [(0, "#f7971e"), (1, "#ffd200")],
+    "mono": [(0, "#ffffff"), (1, "#8e8e93")],
 }
 
 # Brand colours for stack chips / language bars. Unknown names get a neutral dot.

@@ -19,7 +19,8 @@ Los bento READMEs quedan genial, pero hacer uno implica editar un SVG a mano, y 
 - **Un solo archivo.** Eliges tarjetas, tamaños y colores en `bento.yml`; el layout se hace solo.
 - **Datos en vivo.** Contribuciones, racha, último commit, lenguajes, estrellas y líneas de código, refrescados a diario por una GitHub Action.
 - **Nada que alojar.** Se ejecuta en *tu* repo y escribe un SVG estático. Sin servidor, sin servicios de terceros, sin límites de uso.
-- **Claro, oscuro o ambos.** Con `theme: auto` sigue el tema de GitHub de quien te visita.
+- **Hazlo tuyo.** 15 temas, 25 paletas, tus propios colores, fuentes, esquinas, sombras, grano y texturas. Cada tarjeta puede cambiar su fondo, color de texto y radio. Mira [Hazlo tuyo](#hazlo-tuyo).
+- **Claro, oscuro o ambos.** Con `theme: auto` (o cualquier par, como `[nord, solarized-light]`) sigue el tema de GitHub de quien te visita.
 - **Seguro.** El SVG lleva su propia fuente, sin scripts ni peticiones externas, y todo el texto va escapado.
 
 ## Empezar (3 minutos)
@@ -94,6 +95,42 @@ cards:
 
 Las tarjetas se colocan en una rejilla de 4 columnas en el orden en que las listas, y las pequeñas rellenan los huecos. Consulta la [referencia completa](docs/configuration.md) para ver todas las tarjetas, tamaños, colores y opciones.
 
+## Tarjetas disponibles
+
+`hero` (nombre y titular gigante) · `number` (cualquier número o palabra grande) · `streak` (racha) · `heatmap` (calendario de contribuciones) · `commit` (último commit público) · `languages` (lenguajes) · `repos` (repos con más estrellas) · `stack` (chips de tecnologías) · `status` (interruptor con una palabra) · `ring` (anillo de progreso) · `bars` (barras de habilidades) · `text` (texto libre o cita) · `contact` (pares etiqueta/valor) · `image` (una imagen de tu repo) · `cta` (llamada a la acción) · `band` (banda final).
+
+## Hazlo tuyo
+
+Todo el aspecto es configurable, de forma global o por tarjeta:
+
+```yaml
+theme: [dracula, solarized-light]   # 15 incluidos, o define los tuyos
+
+style:
+  corners: soft          # round | soft | sharp | cualquier número de píxeles
+  shadow: true
+  grain: 0.1             # grano de película
+  pattern: dots          # dots | grid | lines | grain
+  font: serif            # sora | system | serif | mono
+  text_case: lower       # keep | lower | upper
+  gap: 12
+  background: [ "#12002b", "#000000" ]
+
+cards:
+  - type: stack
+    items: [python, rust]
+    bg: ["#ff9a9e", "#a18cd1"]   # cualquier tarjeta puede tener su color, degradado o paleta
+    radius: 8                     # y sus propias esquinas, borde, textura...
+```
+
+El color del texto se elige solo para que se lea bien sobre cualquier fondo. Mira la [galería de temas y paletas](docs/themes.md) y la [referencia de configuración](docs/configuration.md#style).
+
+## Ejemplos
+
+Cada uno es una configuración lista para copiar en [`examples/`](examples/): [`neon`](examples/neon.yml) (tema propio, esquinas rectas, grano), [`editorial`](examples/editorial.yml) (serif y papel), [`terminal`](examples/terminal.yml) (monoespaciada), [`pastel`](examples/pastel.yml) (par claro/oscuro), [`designer`](examples/designer.yml), [`developer`](examples/developer.yml) y [`minimal`](examples/minimal.yml). Pruébalos con `python -m bento build -c examples/neon.yml --demo` o créalos con `python -m bento init --template neon`.
+
+<img src="./examples/img/neon.svg" alt="ejemplo neon" width="49%"> <img src="./examples/img/editorial.svg" alt="ejemplo editorial" width="49%">
+
 ## Repos y contribuciones privadas
 
 Por defecto solo se cuentan datos **públicos**. Para incluir repos y contribuciones privadas, crea un [token de acceso personal](https://github.com/settings/tokens) con los permisos `repo` y `read:user`, guárdalo como secreto del repositorio llamado `STATS_TOKEN` y pásalo a la action:
@@ -125,7 +162,7 @@ Abre el `.svg` generado en el navegador. `--demo` usa números de ejemplo; sin �
 
 **¿Puedo hacer tarjetas clicables?** Un SVG mostrado con `<img>` no puede llevar enlaces. Pon enlaces Markdown normales debajo de la imagen.
 
-**¿Puedo usar mis propios colores?** Sí, define una paleta en `bento.yml`. Mira [Paletas propias](docs/configuration.md#custom-palettes).
+**¿Puedo usar mis propios colores?** Sí: define tus propios temas, paletas y degradados en `bento.yml`, o usa `bg` y `fg` en cualquier tarjeta. Mira [Temas](docs/configuration.md#themes) y [Colores](docs/configuration.md#colors).
 
 **¿La fuente se descarga de internet?** No. [Sora](https://github.com/sora-xor/sora-font) (SIL OFL) va incrustada en el SVG, así que se ve igual en todas partes, también dentro de GitHub.
 

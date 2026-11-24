@@ -1,20 +1,27 @@
 """Bento grid: 4 columns, rows measured in half-row units.
 
-A full row is 2 units, so `size: 2x2` is a 568x232 -> 568x480 block and `4x0.5`
-is a slim band. Placement is "dense": cards are taken in config order and each one
-goes into the first free spot, so a small card fills any gap left by bigger ones.
+A full row is always 232 px tall; `gap` and `padding` are configurable and the cell
+sizes adapt around them. `size: 2x2` is a big block and `4x0.5` is a slim band.
+Placement is "dense": cards are taken in config order and each one goes into the
+first free spot, so a small card fills any gap left by bigger ones.
 """
+from collections import namedtuple
 
 COLS = 4
-PAD = 24
-GAP = 16
-CELL_W = 276
-UNIT_H = 108  # 2 units + 1 gap = 232 = one full row
-CANVAS_W = PAD * 2 + COLS * CELL_W + (COLS - 1) * GAP  # 1200
+CANVAS_W = 1200
+ROW_H = 232
+
+Geometry = namedtuple("Geometry", "pad gap cell_w unit_h")
 
 
 class LayoutError(ValueError):
     pass
+
+
+def geometry(pad=24, gap=16):
+    cell_w = (CANVAS_W - 2 * pad - (COLS - 1) * gap) / COLS
+    unit_h = (ROW_H - gap) / 2  # 2 units + 1 gap = one full row
+    return Geometry(pad, gap, cell_w, unit_h)
 
 
 def parse_size(value, default):
@@ -56,13 +63,13 @@ def place(sizes):
     return spots, total
 
 
-def rect(col, unit, cols, units):
-    x = PAD + col * (CELL_W + GAP)
-    y = PAD + unit * (UNIT_H + GAP)
-    w = cols * CELL_W + (cols - 1) * GAP
-    h = units * UNIT_H + (units - 1) * GAP
-    return x, y, w, h
+def rect(geo, col, unit, cols, units):
+    x = geo.pad + col * (geo.cell_w + geo.gap)
+    y = geo.pad + unit * (geo.unit_h + geo.gap)
+    w = cols * geo.cell_w + (cols - 1) * geo.gap
+    h = units * geo.unit_h + (units - 1) * geo.gap
+    return round(x, 2), round(y, 2), round(w, 2), round(h, 2)
 
 
-def canvas_height(total_units):
-    return PAD * 2 + total_units * UNIT_H + (total_units - 1) * GAP
+def canvas_height(geo, total_units):
+    return round(geo.pad * 2 + total_units * geo.unit_h + (total_units - 1) * geo.gap)

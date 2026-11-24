@@ -19,7 +19,8 @@ Bento READMEs look great, but making one means hand-editing an SVG, and the numb
 - **One file to edit.** Pick cards, sizes and colors in `bento.yml`; the layout is done for you.
 - **Live data.** Contributions, streak, latest commit, top languages, stars, lines of code. Refreshed daily by a GitHub Action.
 - **Nothing to host.** It runs in *your* repo and writes a static SVG. No server, no third-party service, no rate limits.
-- **Light, dark or both.** `theme: auto` follows your visitors' GitHub theme.
+- **Make it yours.** 15 themes, 25 palettes, your own colors, fonts, corners, shadows, grain and textures. Every card can override its background, text color and radius. See [Make it yours](#make-it-yours).
+- **Light, dark or both.** `theme: auto` (or any pair, like `[nord, solarized-light]`) follows your visitors' GitHub theme.
 - **Safe by default.** The SVG embeds its own font, has no scripts or external requests, and every text is escaped.
 
 ## Quick start (3 minutes)
@@ -99,18 +100,59 @@ Cards are placed on a 4-column grid in the order you list them, and small cards 
 | `hero` | Name, role, intro and a giant two-line headline |
 | `number` | Any big number or word: from GitHub data or typed by hand; `mesh`, `outline` and `plain` styles |
 | `streak` | Current contribution streak and the last 20 days |
+| `heatmap` | Your contribution calendar |
 | `commit` | Your latest public commit, with a live dot |
-| `status` | A toggle with a big word ("on", "open"…) |
-| `stack` | Tech chips with brand colors |
 | `languages` | Your top languages as a bar |
+| `repos` | Your most starred public repositories |
+| `stack` | Tech chips with brand colors (3 chip styles) |
+| `status` | A toggle with a big word ("on", "open"…) |
+| `ring` | A progress ring with a percentage |
+| `bars` | Progress bars, handy for skills |
+| `text` | Free text or a big quote |
+| `contact` | Label and value pairs (mail, site, location…) |
+| `image` | A picture from your repository |
 | `cta` | A call to action with an arrow |
 | `band` | A slim footer band with the last update date |
 
+## Make it yours
+
+Everything about the look is configurable, globally or per card:
+
+```yaml
+theme: [dracula, solarized-light]   # 15 built in, or define your own
+
+style:
+  corners: soft          # round | soft | sharp | any number of pixels
+  shadow: true
+  grain: 0.1             # film grain
+  pattern: dots          # dots | grid | lines | grain
+  font: serif            # sora | system | serif | mono
+  text_case: lower
+  gap: 12
+  background: [ "#12002b", "#000000" ]
+
+cards:
+  - type: stack
+    items: [python, rust]
+    bg: ["#ff9a9e", "#a18cd1"]   # any card can have its own color, gradient or palette
+    radius: 8                     # and its own corners, border, texture...
+```
+
+Text color is picked automatically so it stays readable on any background you choose. Browse the [theme and palette gallery](docs/themes.md) and the [configuration reference](docs/configuration.md#style).
+
 ## Examples
 
-| Developer (`theme: auto`) | Minimal |
+Each one is a ready-to-copy config in [`examples/`](examples/). Preview any of them locally with `python -m bento build -c examples/neon.yml --demo`, or scaffold one with `python -m bento init --template neon`.
+
+| `neon`: custom theme, sharp corners, grain | `editorial`: serif, paper, shadows |
 | --- | --- |
-| <img src="./examples/img/developer-dark.svg" alt="developer example, dark"> | <img src="./examples/img/minimal.svg" alt="minimal example"> |
+| <img src="./examples/img/neon.svg" alt="neon example"> | <img src="./examples/img/editorial.svg" alt="editorial example"> |
+
+| `terminal`: monospaced, square, scanlines | `pastel`: dark + light pair, custom spacing |
+| --- | --- |
+| <img src="./examples/img/terminal.svg" alt="terminal example"> | <img src="./examples/img/pastel-dark.svg" alt="pastel example, dark"> |
+
+Also: [`designer`](examples/designer.yml), [`developer`](examples/developer.yml) (`theme: auto`) and [`minimal`](examples/minimal.yml).
 
 ## Private repositories and contributions
 
@@ -143,15 +185,15 @@ Open the generated `.svg` in a browser. `--demo` uses sample numbers; without it
 
 **Can I make cards clickable?** SVGs shown through `<img>` can't contain links. Put regular Markdown links under the image, as in the sample README of the designer example.
 
-**Can I use my own colors?** Yes, define a palette in `bento.yml`. See [Custom palettes](docs/configuration.md#custom-palettes).
+**Can I use my own colors?** Yes: define your own theme, palettes and gradients in `bento.yml`, or set `bg` and `fg` on any card. See [Themes](docs/configuration.md#themes) and [Colors](docs/configuration.md#colors).
 
 **Is the font loaded from the internet?** No. [Sora](https://github.com/sora-xor/sora-font) (SIL OFL) is embedded in the SVG, so it renders the same everywhere, including inside GitHub.
 
 ## Roadmap
 
 - A web configurator with live preview that exports `bento.yml`
-- More cards: weekly activity heatmap, pinned repos, social links, now-playing
-- Custom fonts and an emoji-friendly text mode
+- More cards: pinned repos, now-playing, timeline
+- Custom embedded fonts and an emoji-friendly text mode
 
 Ideas and pull requests are welcome. Run `python -m unittest discover -s tests` before opening one.
 
