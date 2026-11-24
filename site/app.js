@@ -1,6 +1,6 @@
 "use strict";
 
-/* readme-bento web configurator.
+/* bento-readme web configurator.
  * The page keeps ONE object (`cfg`) that mirrors bento.yml. The form edits it, the YAML box shows it,
  * and the real Python engine (running in the browser through Pyodide) turns it into the preview. */
 
@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: amehara/readme-bento@v1
+      - uses: amehara/bento-readme@v1
 `;
 
 /* ------------------------------------------------------------------ i18n */
@@ -195,7 +195,7 @@ function ensure() {
   if (cfg.style && typeof cfg.style !== "object") delete cfg.style;
 }
 function yamlText() {
-  return "# bento.yml · made with readme-bento\n" + jsyaml.dump(cfg, { lineWidth: 100, noRefs: true });
+  return "# bento.yml · made with bento-readme\n" + jsyaml.dump(cfg, { lineWidth: 100, noRefs: true });
 }
 function touch(structural = false) {
   dirty = true;
@@ -480,7 +480,7 @@ function renderInstall() {
   else {
     const c = JSON.parse(JSON.stringify(cfg));
     c.github = { ...(c.github || {}), user };
-    steps.push(fileStep(t("i_s3_t"), t("i_s3_p"), user, "", "bento.yml", "# bento.yml · made with readme-bento\n" + jsyaml.dump(c, { lineWidth: 100, noRefs: true })));
+    steps.push(fileStep(t("i_s3_t"), t("i_s3_p"), user, "", "bento.yml", "# bento.yml · made with bento-readme\n" + jsyaml.dump(c, { lineWidth: 100, noRefs: true })));
   }
   steps.push(el("li", { class: "step" }, el("h3", {}, t("i_s4_t")), el("p", {}, t("i_s4_p")),
     el("div", { class: "row" }, el("a", { class: "btn", target: "_blank", rel: "noopener",

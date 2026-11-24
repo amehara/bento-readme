@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="./examples/img/designer.svg" alt="ejemplo de bento grid generado con readme-bento" width="100%">
+<img src="./examples/img/designer.svg" alt="ejemplo de bento grid generado con bento-readme" width="100%">
 
-# readme-bento
+# bento-readme
 
 **Un bento-grid para tu perfil de GitHub que configuras en un solo archivo y que se actualiza solo cada día.**
 
@@ -14,7 +14,7 @@
 
 ## Por qué
 
-Los bento READMEs quedan genial, pero hacer uno implica editar un SVG a mano, y los números se quedan desfasados al día siguiente. **readme-bento** lo convierte en un archivo de configuración:
+Los bento READMEs quedan genial, pero hacer uno implica editar un SVG a mano, y los números se quedan desfasados al día siguiente. **bento-readme** lo convierte en un archivo de configuración:
 
 - **Un solo archivo.** Eliges tarjetas, tamaños y colores en `bento.yml`; el layout se hace solo.
 - **Datos en vivo.** Contribuciones, racha, último commit, lenguajes, estrellas y líneas de código, refrescados a diario por una GitHub Action.
@@ -30,11 +30,11 @@ Elige el camino que más te convenga. Los tres dan el mismo resultado.
 
 ### A. Sin código: el configurador web
 
-Abre **[amehara.github.io/readme-bento](https://amehara.github.io/readme-bento/)**, elige un estilo de partida, cambia tema, colores y tarjetas con el formulario y mira la vista previa actualizarse en directo. Al final te da cinco pasos cortos con botones que abren GitHub con cada archivo ya rellenado. Funciona entero en tu navegador.
+Abre **[amehara.github.io/bento-readme](https://amehara.github.io/bento-readme/)**, elige un estilo de partida, cambia tema, colores y tarjetas con el formulario y mira la vista previa actualizarse en directo. Al final te da cinco pasos cortos con botones que abren GitHub con cada archivo ya rellenado. Funciona entero en tu navegador.
 
 ### B. Un solo archivo, cero configuración
 
-Añade solo el workflow de abajo a tu repositorio de perfil, **sin `bento.yml`**. readme-bento crea entonces un bento a partir de tu perfil de GitHub (nombre, bio, ubicación, contribuciones, lenguajes, repos destacados). Añade un `bento.yml` más adelante cuando quieras personalizarlo. En local: `python -m bento init --zero`.
+Añade solo el workflow de abajo a tu repositorio de perfil, **sin `bento.yml`**. bento-readme crea entonces un bento a partir de tu perfil de GitHub (nombre, bio, ubicación, contribuciones, lenguajes, repos destacados). Añade un `bento.yml` más adelante cuando quieras personalizarlo. En local: `python -m bento init --zero`.
 
 ### C. Control total: escribe `bento.yml`
 
@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: amehara/readme-bento@v1
+      - uses: amehara/bento-readme@v1
 ```
 
 **3. Ejecútalo y muéstralo.** Ve a la pestaña **Actions** → *update bento* → **Run workflow**. Al terminar aparece `bento.svg` en tu repo. Añádelo a tu `README.md`:
@@ -151,7 +151,7 @@ Cada uno es una configuración lista para copiar en [`examples/`](examples/): [`
 Por defecto solo se cuentan datos **públicos**. Para incluir repos y contribuciones privadas, crea un [token de acceso personal](https://github.com/settings/tokens) con los permisos `repo` y `read:user`, guárdalo como secreto del repositorio llamado `STATS_TOKEN` y pásalo a la action:
 
 ```yaml
-      - uses: amehara/readme-bento@v1
+      - uses: amehara/bento-readme@v1
         with:
           token: ${{ secrets.STATS_TOKEN }}
 ```
@@ -163,7 +163,7 @@ Al SVG solo llegan los *números*; los nombres de repositorios privados nunca se
 Puedes diseñar tu bento sin subir nada. Necesitas Python 3.10+ y `pip install pyyaml`:
 
 ```bash
-git clone https://github.com/amehara/readme-bento && cd readme-bento
+git clone https://github.com/amehara/bento-readme && cd bento-readme
 python -m bento build -c ruta/a/tu/bento.yml --demo   # datos de ejemplo, sin red
 python -m bento validate -c ruta/a/tu/bento.yml        # comprueba la config
 python -m bento init --user <tú> --template developer  # genera config + workflow

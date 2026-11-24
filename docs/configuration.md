@@ -46,7 +46,7 @@ Any text can pull from your GitHub profile. Quote the value so YAML keeps the br
   body: "{bio|i build things and share them here.}"
 ```
 
-Unknown placeholders are left exactly as typed. With **no `bento.yml` at all**, readme-bento uses a built-in config made of these placeholders ([`bento/data/default.yml`](../bento/data/default.yml)); copy it to `bento.yml` to start customizing.
+Unknown placeholders are left exactly as typed. With **no `bento.yml` at all**, bento-readme uses a built-in config made of these placeholders ([`bento/data/default.yml`](../bento/data/default.yml)); copy it to `bento.yml` to start customizing.
 
 ## The grid
 

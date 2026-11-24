@@ -85,7 +85,7 @@ class Client:
 
     def call(self, path, body=None):
         url = path if path.startswith("http") else API + path
-        headers = {"Accept": "application/vnd.github+json", "User-Agent": "readme-bento"}
+        headers = {"Accept": "application/vnd.github+json", "User-Agent": "bento-readme"}
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         data = json.dumps(body).encode() if body is not None else None

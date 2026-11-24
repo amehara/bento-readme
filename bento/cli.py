@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: amehara/readme-bento@v1
+      - uses: amehara/bento-readme@v1
         # with:
         #   token: ${{ secrets.STATS_TOKEN }}   # optional PAT: also counts private repos/contributions
 """
@@ -115,7 +115,7 @@ def cmd_init(args):
 
 def main(argv=None):
     p = argparse.ArgumentParser(prog="bento", description="Generate a bento-grid SVG for your GitHub README.")
-    p.add_argument("--version", action="version", version=f"readme-bento {__version__}")
+    p.add_argument("--version", action="version", version=f"bento-readme {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     b = sub.add_parser("build", help="fetch stats and write the SVG(s)")

@@ -1,4 +1,4 @@
-# readme-bento config. Docs: https://github.com/amehara/readme-bento#configuration
+# bento-readme config. Docs: https://github.com/amehara/bento-readme#configuration
 github:
   user: your-github-username   # leave empty in the Action to use the repo owner
 
