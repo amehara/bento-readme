@@ -4,6 +4,7 @@
  * The page keeps ONE object (`cfg`) that mirrors bento.yml. The form edits it, the YAML box shows it,
  * and the real Python engine (running in the browser through Pyodide) turns it into the preview. */
 
+const BUILD = "__BUILD__"; // replaced at build time so a new deploy never mixes with cached files
 const PYODIDE_URL = "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/";
 const PLACEHOLDER_USER = "your-github-username";
 const MAX_LINK = 7000; // GitHub links with a pre-filled file stop working when they get too long
@@ -56,7 +57,11 @@ const I18N = {
     t_hero: "Hero (name and headline)", t_number: "Big number", t_streak: "Contribution streak", t_commit: "Latest commit",
     t_status: "Status toggle", t_stack: "Tech stack", t_languages: "Top languages", t_cta: "Call to action", t_band: "Footer band",
     t_text: "Text or quote", t_contact: "Contact list", t_heatmap: "Contribution calendar", t_repos: "Top repositories",
-    t_bars: "Skill bars", t_ring: "Progress ring",
+    t_bars: "Skill bars", t_ring: "Progress ring", t_image: "Image",
+    k_src: "Image file (in your repository, next to bento.yml)", k_fit: "Fit", fit_cover: "Fill the card", fit_contain: "Fit inside",
+    img_missing: "The preview shows a placeholder for: {files}. Upload that file to your repository.",
+    i_img_t: "Upload your images", i_img_p: "Your design uses images. Add each file to your repository at the same path, then run it again.",
+    i_img_up: "Upload to GitHub",
     k_title: "Title", k_subtitle: "Subtitle", k_intro: "Intro (one line each)", k_headline: "Giant headline (1-2 lines)",
     k_source: "Show", k_value: "Text", k_label: "Label (one line each)", k_style: "Style", k_word: "Big word", k_caption: "Caption",
     k_items: "Items", k_items_csv: "Items (separated by commas)", k_items_pairs: "Items (one per line, like \"Mail: me@example.com\")",
@@ -102,7 +107,11 @@ const I18N = {
     t_hero: "Principal (nombre y titular)", t_number: "Número grande", t_streak: "Racha de contribuciones", t_commit: "Último commit",
     t_status: "Interruptor de estado", t_stack: "Tecnologías", t_languages: "Lenguajes más usados", t_cta: "Llamada a la acción", t_band: "Banda final",
     t_text: "Texto o cita", t_contact: "Lista de contacto", t_heatmap: "Calendario de contribuciones", t_repos: "Repositorios destacados",
-    t_bars: "Barras de habilidades", t_ring: "Anillo de progreso",
+    t_bars: "Barras de habilidades", t_ring: "Anillo de progreso", t_image: "Imagen",
+    k_src: "Archivo de imagen (en tu repositorio, junto a bento.yml)", k_fit: "Ajuste", fit_cover: "Rellenar la tarjeta", fit_contain: "Caber dentro",
+    img_missing: "La vista previa muestra un marcador para: {files}. Sube ese archivo a tu repositorio.",
+    i_img_t: "Sube tus imágenes", i_img_p: "Tu diseño usa imágenes. Añade cada archivo a tu repositorio en la misma ruta y vuelve a ejecutarlo.",
+    i_img_up: "Subir a GitHub",
     k_title: "Título", k_subtitle: "Subtítulo", k_intro: "Introducción (una línea por renglón)", k_headline: "Titular gigante (1-2 líneas)",
     k_source: "Mostrar", k_value: "Texto", k_label: "Etiqueta (una línea por renglón)", k_style: "Estilo", k_word: "Palabra grande", k_caption: "Pie",
     k_items: "Elementos", k_items_csv: "Elementos (separados por comas)", k_items_pairs: "Elementos (uno por línea, como \"Correo: yo@ejemplo.com\")",
@@ -145,6 +154,7 @@ const FIELDS = {
   contact: [F("label", "text"), F("items", "lines", { labelKey: "k_items_pairs" })],
   bars: [F("label", "text"), F("items", "lines", { labelKey: "k_items_bars" })],
   ring: [F("value", "num"), F("label", "text"), F("caption", "text")],
+  image: [F("src", "text"), F("caption", "text"), F("fit", "select", { options: ["cover", "contain"], prefix: "fit_" })],
 };
 const NEW_CARD = {
   hero: { type: "hero", size: "2x2", title: "your name", subtitle: "what you do", intro: ["a short line about you."], headline: ["hello,", "world."] },
@@ -166,6 +176,7 @@ const ORDER = ["hero", "number", "streak", "heatmap", "commit", "languages", "re
 let cfg = { github: {}, theme: "dark", cards: [] };
 let schema = null;
 let api = null;
+let pyodide = null;
 let preset = "profile";
 let dirty = false;
 let renderToken = 0;
@@ -388,7 +399,7 @@ function userFromCfg() {
 
 /* ----------------------------------------------------------------- presets */
 async function loadPreset(name) {
-  const res = await fetch(`presets/${name}.yml`);
+  const res = await fetch(`presets/${name}.yml?v=${BUILD}`);
   if (!res.ok) return;
   const keep = $("user").value.trim();
   cfg = jsyaml.load(await res.text());
@@ -403,11 +414,36 @@ async function loadPreset(name) {
 /* ----------------------------------------------------------------- preview */
 const schedulePreview = debounce(runPreview, 180);
 
+/* Images a design refers to (the `image` card). The preset ones are served next to the page and copied into the
+ * engine's virtual file system; anything else only exists in the user's repository, so the preview shows a placeholder. */
+const assets = new Map(); // path -> bytes, for the files we could fetch
+const SAFE_PATH = /^[A-Za-z0-9_][A-Za-z0-9_./-]*$/;
+const imageSources = () => cfg.cards
+  .filter((c) => c && c.type === "image" && typeof c.src === "string" && SAFE_PATH.test(c.src) && !c.src.split("/").includes(".."))
+  .map((c) => c.src);
+
+async function loadAssets() {
+  for (const src of imageSources()) {
+    if (assets.has(src)) continue;
+    try {
+      const res = await fetch(`presets/${src}?v=${BUILD}`);
+      if (!res.ok) { assets.set(src, null); continue; }
+      const bytes = new Uint8Array(await res.arrayBuffer());
+      const full = `/tmp/${src}`;
+      pyodide.FS.mkdirTree(full.slice(0, full.lastIndexOf("/")));
+      pyodide.FS.writeFile(full, bytes);
+      assets.set(src, bytes);
+    } catch { assets.set(src, null); }
+  }
+}
+
 async function runPreview() {
   if (!api) return;
   const token = ++renderToken;
   $("status").textContent = t("rendering");
   await new Promise((r) => setTimeout(r, 0)); // let the browser paint before the (synchronous) render
+  await loadAssets();
+  if (token !== renderToken) return;
   let res;
   try { res = JSON.parse(api.preview(yamlText(), JSON.stringify(profile))); } catch (e) { res = { error: String(e) }; }
   if (token !== renderToken) return;
@@ -418,7 +454,8 @@ async function runPreview() {
   if (activeVariant >= res.files.length) activeVariant = 0;
   showVariant();
   renderVariantButtons();
-  $("status").textContent = t("ready");
+  $("status").textContent = res.missing_images && res.missing_images.length
+    ? t("img_missing", { files: res.missing_images.join(", ") }) : t("ready");
   renderInstall();
 }
 function showVariant() {
@@ -482,6 +519,19 @@ function renderInstall() {
     c.github = { ...(c.github || {}), user };
     steps.push(fileStep(t("i_s3_t"), t("i_s3_p"), user, "", "bento.yml", "# bento.yml · made with bento-readme\n" + jsyaml.dump(c, { lineWidth: 100, noRefs: true })));
   }
+  const imgs = zero ? [] : [...new Set(imageSources())];
+  if (imgs.length) { // the design refers to files that must live in the user's repository
+    const enc = encodeURIComponent;
+    const rows = imgs.map((src) => {
+      const dir = src.includes("/") ? src.slice(0, src.lastIndexOf("/")) : "";
+      const upload = `https://github.com/${enc(user)}/${enc(user)}/upload/main${dir ? "/" + dir : ""}`;
+      const kids = [el("code", {}, src), " "];
+      if (assets.get(src)) kids.push(download(src.split("/").pop(), assets.get(src)));
+      kids.push(el("a", { class: "btn plain", href: upload, target: "_blank", rel: "noopener" }, t("i_img_up")));
+      return el("div", { class: "row" }, ...kids);
+    });
+    steps.push(el("li", { class: "step" }, el("h3", {}, t("i_img_t")), el("p", {}, t("i_img_p")), ...rows));
+  }
   steps.push(el("li", { class: "step" }, el("h3", {}, t("i_s4_t")), el("p", {}, t("i_s4_p")),
     el("div", { class: "row" }, el("a", { class: "btn", target: "_blank", rel: "noopener",
       href: `https://github.com/${encodeURIComponent(user)}/${encodeURIComponent(user)}/actions/workflows/bento.yml` }, t("i_s4_b")))));
@@ -537,10 +587,11 @@ async function boot() {
   $("status").textContent = t("loading");
   try {
     const py = await loadPyodide({ indexURL: PYODIDE_URL });
+    pyodide = py;
     await py.loadPackage("pyyaml");
-    const files = await (await fetch("py/manifest.json")).json();
+    const files = await (await fetch(`py/manifest.json?v=${BUILD}`)).json();
     await Promise.all(files.map(async (rel) => {
-      const buf = new Uint8Array(await (await fetch(`py/${rel}`)).arrayBuffer());
+      const buf = new Uint8Array(await (await fetch(`py/${rel}?v=${BUILD}`)).arrayBuffer());
       const full = `/home/pyodide/${rel}`;
       py.FS.mkdirTree(full.slice(0, full.lastIndexOf("/")));
       py.FS.writeFile(full, buf);
@@ -554,7 +605,7 @@ async function boot() {
     return;
   }
 
-  const names = await (await fetch("presets/index.json")).json();
+  const names = await (await fetch(`presets/index.json?v=${BUILD}`)).json();
   $("presets").replaceChildren(...names.map((n) => el("button", {
     type: "button", class: "chip", "data-name": n, "aria-pressed": "false", onclick: () => loadPreset(n),
   }, t(`preset_${n}`))));

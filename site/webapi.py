@@ -18,6 +18,8 @@ def schema():
 
 def preview(yaml_text, profile_json="{}"):
     """Validates a config and renders it with sample numbers (and the real profile text, if given)."""
+    config.MISSING_IMAGES.clear()
+    config.LENIENT_IMAGES = True  # images may only exist in the user's repository: show a placeholder, do not fail
     try:
         with open(CONFIG_PATH, "w", encoding="utf-8") as f:
             f.write(yaml_text)
@@ -30,8 +32,11 @@ def preview(yaml_text, profile_json="{}"):
             for suffix, theme, rel in render.outputs(cfg)
         ]
         return json.dumps({"error": None, "files": files, "snippet": render.readme_snippet(cfg, data),
-                           "user": cfg["user"], "default": bool(cfg.get("default"))})
+                           "user": cfg["user"], "default": bool(cfg.get("default")),
+                           "missing_images": sorted(set(config.MISSING_IMAGES))})
     except config.ConfigError as e:
         return json.dumps({"error": str(e)})
     except Exception as e:  # noqa: BLE001 - never let a bad config break the page
         return json.dumps({"error": f"{type(e).__name__}: {e}"})
+    finally:
+        config.LENIENT_IMAGES = False  # the strict behaviour is the default everywhere else

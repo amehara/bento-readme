@@ -393,6 +393,32 @@ class WebApiTests(unittest.TestCase):
         broken = json.loads(webapi.preview("cards: [unclosed"))
         self.assertTrue(broken["error"])
 
+    def test_missing_image_is_a_placeholder_in_the_web_but_an_error_everywhere_else(self):
+        import json
+        yml = "cards:\n  - {type: image, src: nowhere/photo.png, caption: hi}\n"
+        res = json.loads(webapi.preview(yml))
+        self.assertIsNone(res["error"])  # the web previews files that only exist in the user's repository
+        self.assertEqual(res["missing_images"], ["nowhere/photo.png"])
+        ET.fromstring(res["files"][0]["svg"])
+        with self.assertRaises(ConfigError):  # the CLI and the Action stay strict
+            load(write_cfg(yml))
+
+    def test_the_editorial_preset_uses_its_real_image_when_the_web_provides_it(self):
+        import json
+        import shutil
+        with open(os.path.join(EXAMPLES, "editorial.yml"), encoding="utf-8") as f:
+            text = f.read()
+        base = os.path.dirname(webapi.CONFIG_PATH)
+        target = os.path.join(base, "assets")
+        os.makedirs(target, exist_ok=True)
+        shutil.copyfile(os.path.join(EXAMPLES, "assets", "avatar.svg"), os.path.join(target, "avatar.svg"))
+        try:  # this is what the page does with presets/assets/* before every preview
+            res = json.loads(webapi.preview(text))
+            self.assertIsNone(res["error"])
+            self.assertEqual(res["missing_images"], [])
+        finally:
+            shutil.rmtree(target, ignore_errors=True)
+
     def test_preview_uses_real_profile_text_but_sample_numbers(self):
         import json
         res = json.loads(webapi.preview("cards:\n  - {type: hero, size: 2x2, title: '{name}'}\n", '{"name": "Ada Lovelace"}'))

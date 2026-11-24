@@ -5,6 +5,7 @@
 
 The engine itself is copied as-is: the page runs the very same Python code as the Action, through Pyodide.
 """
+import hashlib
 import json
 import os
 import shutil
@@ -44,10 +45,27 @@ def main():
         if name.endswith(".yml"):
             shutil.copyfile(os.path.join(ROOT, "examples", name), os.path.join(presets, name))
             names.append(name[:-4])
+    assets = os.path.join(ROOT, "examples", "assets")  # files the presets refer to (e.g. editorial's avatar)
+    if os.path.isdir(assets):
+        shutil.copytree(assets, os.path.join(presets, "assets"))
     shutil.copyfile(os.path.join(ROOT, "bento", "data", "default.yml"), os.path.join(presets, "profile.yml"))
     names.insert(0, "profile")
     with open(os.path.join(presets, "index.json"), "w", encoding="utf-8") as f:
         json.dump(names, f)
+    # cache-busting: a short hash of everything we ship, stamped into the page and its script
+    digest = hashlib.sha1()
+    for base, dirs, files in sorted(os.walk(OUT)):
+        dirs.sort()
+        for name in sorted(files):
+            with open(os.path.join(base, name), "rb") as f:
+                digest.update(name.encode() + f.read())
+    build = digest.hexdigest()[:10]
+    for name in ("index.html", "app.js"):
+        path = os.path.join(OUT, name)
+        with open(path, encoding="utf-8") as f:
+            text = f.read().replace("__BUILD__", build)
+        with open(path, "w", encoding="utf-8", newline="\n") as f:
+            f.write(text)
     print("built", os.path.relpath(OUT, ROOT), "-", len(manifest), "python files,", len(names), "presets")
 
 

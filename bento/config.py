@@ -188,6 +188,16 @@ def _build_themes(data):
 
 
 # ----------------------------------------------------------------------------- cards
+# Off by default: the CLI and the Action must fail loudly on a missing image. The web configurator turns it on
+# for the duration of a preview, because there the image lives in the user's repository, not in the browser.
+LENIENT_IMAGES = False
+MISSING_IMAGES = []
+PLACEHOLDER_IMAGE = base64.b64encode(
+    b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="#2a2a2e"/>'
+    b'<circle cx="68" cy="66" r="14" fill="#4a4a50"/><path d="M30 156l42-54 30 36 22-28 46 46z" fill="#4a4a50"/></svg>'
+).decode()
+
+
 def _load_image(spec, where, base_dir):
     src = spec.get("src")
     if not isinstance(src, str) or not src:
@@ -196,6 +206,9 @@ def _load_image(spec, where, base_dir):
         raise ConfigError(f"{where}: 'src' must be a relative path inside the repository")
     full = os.path.realpath(os.path.join(base_dir, src))
     if not full.startswith(os.path.realpath(base_dir) + os.sep) or not os.path.isfile(full):
+        if LENIENT_IMAGES:  # the web configurator previews images that only exist in the user's repository
+            MISSING_IMAGES.append(src)
+            return "image/svg+xml", PLACEHOLDER_IMAGE
         raise ConfigError(f"{where}: image not found: {src}")
     ext = full.rsplit(".", 1)[-1].lower()
     if ext not in IMAGE_TYPES:
