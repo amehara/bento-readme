@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: read
+  actions: read   # to check that the uploaded artifact is listed before deploying
   pages: write
   id-token: write
 
@@ -39,5 +40,17 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
+      # GitHub sometimes answers "0 artifacts" if deploy-pages asks for the artifact in the very second after it was
+      # uploaded (a race on their side: the upload succeeded and the artifact shows up moments later). Wait for it.
+      - name: Wait until the artifact is listed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in $(seq 1 20); do
+            n=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts" --jq '.total_count')
+            if [ "$n" -gt 0 ]; then echo "artifact listed after $i check(s)"; exit 0; fi
+            sleep 3
+          done
+          echo "::warning::the artifact was not listed after 60 s; deploying anyway"
       - id: deployment
         uses: actions/deploy-pages@v4
